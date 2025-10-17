@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ArrowLeft, Menu, Bell, Flag } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import DatabaseManager, { Area } from '@/lib/database-updated';
+import ClientDatabaseManager, { Area } from '@/lib/database-client';
 
 export default function ProductAreasPage() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function ProductAreasPage() {
   const loadAreas = async () => {
     try {
       setLoading(true);
-      const data = await DatabaseManager.loadAreas();
+      const data = await ClientDatabaseManager.loadAreas();
       setAreas(data);
       setFilteredAreas(data);
     } catch (error) {
@@ -51,10 +51,8 @@ export default function ProductAreasPage() {
   };
 
   const loadCountryFlag = async () => {
-    if (user?.phone) {
-      const flag = await DatabaseManager.getCountryFromPhone(user.phone);
-      setCountryFlag(flag);
-    }
+    // Country flag functionality removed for client-side compatibility
+    setCountryFlag('🌍');
   };
 
   const handleAreaClick = (areaId: number) => {

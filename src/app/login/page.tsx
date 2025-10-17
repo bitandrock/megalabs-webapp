@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 const LoginPage = () => {
   const { user, signInMicrosoft, signInGoogle, loading } = useAuth();
@@ -22,8 +21,9 @@ const LoginPage = () => {
       setAuthLoading(true);
       setError('');
       await signInMicrosoft();
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in with Microsoft');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Microsoft';
+      setError(errorMessage);
       console.error('Microsoft login error:', error);
     } finally {
       setAuthLoading(false);
@@ -35,13 +35,15 @@ const LoginPage = () => {
       setAuthLoading(true);
       setError('');
       await signInGoogle();
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in with Google');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
+      setError(errorMessage);
       console.error('Google login error:', error);
     } finally {
       setAuthLoading(false);
     }
   };
+
 
   if (loading) {
     return (

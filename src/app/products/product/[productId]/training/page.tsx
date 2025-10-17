@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Search, ArrowLeft, Menu, Bell, Flag, BookOpen, Clock, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import DatabaseManager, { TrainingTopic, Product } from '@/lib/database-updated';
+import ClientDatabaseManager, { TrainingTopic, Product } from '@/lib/database-client';
 
 export default function TrainingTopicsPage() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function TrainingTopicsPage() {
 
   const loadTrainingTopics = async () => {
     try {
-      const data = await DatabaseManager.getTrainingTopics(productId);
+      const data = await ClientDatabaseManager.getTrainingTopics(productId);
       setTrainingTopics(data);
       setFilteredTopics(data);
     } catch (error) {
@@ -56,7 +56,7 @@ export default function TrainingTopicsPage() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const data = await DatabaseManager.getProductById(productId);
+      const data = await ClientDatabaseManager.getProductById(productId);
       setProduct(data);
     } catch (error) {
       console.error('Error loading product:', error);
@@ -66,10 +66,8 @@ export default function TrainingTopicsPage() {
   };
 
   const loadCountryFlag = async () => {
-    if (user?.phone) {
-      const flag = await DatabaseManager.getCountryFromPhone(user.phone);
-      setCountryFlag(flag);
-    }
+    // Country flag functionality removed for client-side compatibility
+    setCountryFlag('🌍');
   };
 
   const handleTopicClick = (topicId: number) => {

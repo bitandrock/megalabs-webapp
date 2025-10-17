@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Menu, Bell, Flag, Play, FileText, BookOpen, MessageCircle, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import DatabaseManager, { Product } from '@/lib/database-updated';
+import ClientDatabaseManager, { Product } from '@/lib/database-client';
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -28,7 +28,7 @@ export default function ProductDetailPage() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const data = await DatabaseManager.getProductById(productId);
+      const data = await ClientDatabaseManager.getProductById(productId);
       setProduct(data);
     } catch (error) {
       console.error('Error loading product:', error);
@@ -38,10 +38,8 @@ export default function ProductDetailPage() {
   };
 
   const loadCountryFlag = async () => {
-    if (user?.phone) {
-      const flag = await DatabaseManager.getCountryFromPhone(user.phone);
-      setCountryFlag(flag);
-    }
+    // Country flag functionality removed for client-side compatibility
+    setCountryFlag('🌍');
   };
 
   const handleBack = () => {

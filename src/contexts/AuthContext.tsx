@@ -62,6 +62,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Request URL:', error.config?.url);
+        console.error('Status:', error.response?.status);
+        console.error('Response:', error.response?.data);
+        
+        // If it's a 404, the profile API should have attempted auto-migration
+        // Let's try once more after a short delay
+        if (error.response?.status === 404) {
+          console.log('🔄 Got 404, retrying profile fetch in 2 seconds...');
+          setTimeout(async () => {
+            try {
+              const retryToken = await firebaseUser.getIdToken();
+              const retryResponse = await axios.get('/api/auth/profile', {
+                headers: { Authorization: `Bearer ${retryToken}` },
+              });
+              if (retryResponse.data.success) {
+                setUserProfile(retryResponse.data.profile);
+                console.log('✅ Profile fetch successful on retry!');
+              }
+            } catch (retryError) {
+              console.log('❌ Retry failed, user might need manual account linking');
+            }
+          }, 2000);
+        }
+      }
       setUserProfile(null);
     }
   };

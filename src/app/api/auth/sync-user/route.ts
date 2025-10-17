@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import DatabaseManager from '@/lib/database';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,38 +41,72 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    let userProfile = await DatabaseManager.getUserByFirebaseUid(firebaseUid);
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('firebase_uid', firebaseUid)
+      .single();
 
-    if (userProfile) {
+    let finalUserProfile = null;
+    
+    if (userProfile && !profileError) {
       // Update existing user
-      userProfile = await DatabaseManager.updateUser(firebaseUid, {
-        email: body.email,
-        username: body.username,
-        phone: body.phone,
-      });
+      const { data: updatedUser, error: updateError } = await supabaseAdmin
+        .from('users')
+        .update({
+          email: body.email,
+          username: body.username,
+          phone: body.phone,
+          firebase_uid: firebaseUid,
+          updated_at: new Date().toISOString()
+        })
+        .eq('firebase_uid', firebaseUid)
+        .select()
+        .single();
+      
+      finalUserProfile = updatedUser;
     } else {
       // Check if user exists with same email (for migration from old system)
-      const existingUser = await DatabaseManager.getUserByEmail(body.email);
+      const { data: existingUser, error: existingError } = await supabaseAdmin
+        .from('users')
+        .select('*')
+        .eq('email', body.email)
+        .single();
       
-      if (existingUser && !existingUser.firebase_uid) {
-        // Migrate existing user to Firebase
-        userProfile = await DatabaseManager.updateUser(firebaseUid, {
-          email: body.email,
-          username: body.username,
-          phone: body.phone,
-        });
+      if (existingUser && !existingUser.firebase_uid && !existingError) {
+        // Migrate existing user to Firebase by updating their firebase_uid
+        const { data: migratedUser, error: migrateError } = await supabaseAdmin
+          .from('users')
+          .update({
+            firebase_uid: firebaseUid,
+            username: body.username || existingUser.username,
+            phone: body.phone || existingUser.phone,
+            updated_at: new Date().toISOString()
+          })
+          .eq('email', body.email)
+          .select()
+          .single();
+        
+        finalUserProfile = migratedUser;
       } else {
         // Create new user
-        userProfile = await DatabaseManager.createUser({
-          firebaseUid: firebaseUid,
-          email: body.email,
-          username: body.username,
-          phone: body.phone,
-        });
+        const { data: newUser, error: createError } = await supabaseAdmin
+          .from('users')
+          .insert({
+            firebase_uid: firebaseUid,
+            email: body.email,
+            username: body.username,
+            phone: body.phone,
+            is_service_center: false
+          })
+          .select()
+          .single();
+        
+        finalUserProfile = newUser;
       }
     }
 
-    if (!userProfile) {
+    if (!finalUserProfile) {
       return NextResponse.json(
         { success: false, error: 'Failed to create/update user profile' },
         { status: 500 }
@@ -82,13 +115,13 @@ export async function POST(request: NextRequest) {
 
     // Transform database result to match expected interface
     const profile = {
-      id: userProfile.id,
-      username: userProfile.username,
-      email: userProfile.email,
-      phone: userProfile.phone,
-      isServiceCenter: userProfile.is_service_center === 1,
-      isActivated: userProfile.is_activated === 1,
-      firebaseUid: userProfile.firebase_uid,
+      id: finalUserProfile.id,
+      username: finalUserProfile.username,
+      email: finalUserProfile.email,
+      phone: finalUserProfile.phone,
+      isServiceCenter: finalUserProfile.is_service_center === true,
+      isActivated: true, // Default to activated for new users
+      firebaseUid: finalUserProfile.firebase_uid,
     };
 
     return NextResponse.json({
