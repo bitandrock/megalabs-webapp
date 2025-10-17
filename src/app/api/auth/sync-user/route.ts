@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       if (!firebaseUid) {
         throw new Error('Invalid token structure');
       }
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { success: false, error: 'Invalid token' },
         { status: 401 }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     
     if (userProfile && !profileError) {
       // Update existing user
-      const { data: updatedUser, error: updateError } = await supabaseAdmin
+      const { data: updatedUser } = await supabaseAdmin
         .from('users')
         .update({
           email: body.email,
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       
       if (existingUser && !existingUser.firebase_uid && !existingError) {
         // Migrate existing user to Firebase by updating their firebase_uid
-        const { data: migratedUser, error: migrateError } = await supabaseAdmin
+        const { data: migratedUser } = await supabaseAdmin
           .from('users')
           .update({
             firebase_uid: firebaseUid,
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         finalUserProfile = migratedUser;
       } else {
         // Create new user
-        const { data: newUser, error: createError } = await supabaseAdmin
+        const { data: newUser } = await supabaseAdmin
           .from('users')
           .insert({
             firebase_uid: firebaseUid,

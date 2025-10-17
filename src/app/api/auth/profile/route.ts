@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       if (!firebaseUid) {
         throw new Error('Invalid token structure');
       }
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { success: false, error: 'Invalid token' },
         { status: 401 }

@@ -23,7 +23,7 @@ export default function ProductDetailPage() {
     if (user?.phone) {
       loadCountryFlag();
     }
-  }, [productId, user]);
+  }, [productId, user, loadProduct]);
 
   const loadProduct = async () => {
     try {

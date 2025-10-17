@@ -27,7 +27,7 @@ export default function TrainingTopicsPage() {
     if (user?.phone) {
       loadCountryFlag();
     }
-  }, [productId, user]);
+  }, [productId, user, loadTrainingTopics, loadProduct]);
 
   // Filter topics based on search text
   useEffect(() => {

@@ -43,7 +43,7 @@ export default function ProductCategoriesPage() {
   // Load products and area info on component mount
   useEffect(() => {
     loadProducts();
-  }, [areaId, user]);
+  }, [areaId, user, loadProducts]);
 
   // Filter products based on search text
   useEffect(() => {

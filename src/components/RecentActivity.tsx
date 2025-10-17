@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface RecentActivityProps {
-  userId: number;
+  userId?: number | string;
 }
 
 const RecentActivity: React.FC<RecentActivityProps> = ({ userId }) => {

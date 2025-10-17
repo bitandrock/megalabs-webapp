@@ -26,7 +26,7 @@ export default function TrainingTopicDetailPage() {
     if (user?.phone) {
       loadCountryFlag();
     }
-  }, [topicId, user]);
+  }, [topicId, user, loadTopic]);
 
   // Calculate reading time when topic loads
   useEffect(() => {

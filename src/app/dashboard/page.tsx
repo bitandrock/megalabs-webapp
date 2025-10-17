@@ -118,7 +118,7 @@ const DashboardPage = () => {
                 <p className="b4i-body" style={{ color: 'var(--text-secondary)' }}>Intenta con otros términos de búsqueda</p>
               </div>
             ) : (
-              filteredAreas.map((area, index) => (
+            {filteredAreas.map((area) => (
                 <div
                   key={area.id}
                   onClick={() => handleAreaClick(area)}

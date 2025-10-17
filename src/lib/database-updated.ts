@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { RealtimePostgresChangesPayload, RealtimeChannel } from '@supabase/supabase-js';
 
 // Types based on the B4i/B4A architecture
 export interface Area {
@@ -441,7 +442,7 @@ export class DatabaseManager {
 
   // ===== REAL-TIME SUBSCRIPTIONS =====
   
-  static subscribeToChatMessages(chatTopicId: number, callback: (payload: any) => void) {
+  static subscribeToChatMessages(chatTopicId: number, callback: (payload: RealtimePostgresChangesPayload<ChatMessage>) => void) {
     return supabase
       .channel(`chat-${chatTopicId}`)
       .on(
@@ -457,7 +458,7 @@ export class DatabaseManager {
       .subscribe();
   }
 
-  static unsubscribeFromChannel(subscription: any) {
+  static unsubscribeFromChannel(subscription: RealtimeChannel) {
     if (subscription) {
       supabase.removeChannel(subscription);
     }

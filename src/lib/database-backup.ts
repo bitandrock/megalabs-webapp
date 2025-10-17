@@ -1,8 +1,8 @@
 import { supabaseAdmin } from './supabase';
-import type { Database, Tables, Inserts, Updates } from './supabase';
+import type { Tables, Updates } from './supabase';
 
 export interface DBResult {
-  rows: any[];
+  rows: unknown[];
   columns: string[];
 }
 
@@ -259,7 +259,7 @@ export class DatabaseManager {
       
       // Transform data to include message count and last message time
       const transformedData = data?.map(topic => {
-        const messages = topic.chat_messages as any[] || [];
+        const messages = (topic.chat_messages as { id: string; created_at: string }[]) || [];
         return {
           ...topic,
           message_count: messages.length,

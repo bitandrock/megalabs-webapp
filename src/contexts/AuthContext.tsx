@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setUserProfile(retryResponse.data.profile);
                 console.log('✅ Profile fetch successful on retry!');
               }
-            } catch (retryError) {
+            } catch {
               console.log('❌ Retry failed, user might need manual account linking');
             }
           }, 2000);

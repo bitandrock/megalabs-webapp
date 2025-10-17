@@ -576,7 +576,7 @@ export class DatabaseManager {
 
   // ===== REAL-TIME SUBSCRIPTIONS =====
   
-  static subscribeToChatMessages(chatTopicId: number, callback: (payload: any) => void) {
+  static subscribeToChatMessages(chatTopicId: number, callback: (payload: unknown) => void) {
     return supabase
       .channel(`chat-${chatTopicId}`)
       .on(
@@ -592,7 +592,7 @@ export class DatabaseManager {
       .subscribe();
   }
 
-  static unsubscribeFromChannel(subscription: any) {
+  static unsubscribeFromChannel(subscription: unknown) {
     if (subscription) {
       supabase.removeChannel(subscription);
     }

@@ -22,7 +22,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Initialize Firebase Messaging (only in browser)
-let messaging: any = null;
+let messaging: unknown = null;
 if (typeof window !== 'undefined') {
   messaging = getMessaging(app);
 }
