@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 // Types based on the B4i/B4A architecture
 export interface Area {
@@ -592,7 +593,7 @@ export class DatabaseManager {
       .subscribe();
   }
 
-  static unsubscribeFromChannel(subscription: unknown) {
+  static unsubscribeFromChannel(subscription: RealtimeChannel | null) {
     if (subscription) {
       supabase.removeChannel(subscription);
     }

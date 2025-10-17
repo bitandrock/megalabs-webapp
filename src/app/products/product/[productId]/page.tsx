@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Menu, Bell, Flag, Play, FileText, BookOpen, MessageCircle, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,15 +17,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [countryFlag, setCountryFlag] = useState('🏳️');
 
-  // Load product details on component mount
-  useEffect(() => {
-    loadProduct();
-    if (user?.phone) {
-      loadCountryFlag();
-    }
-  }, [productId, user, loadProduct]);
-
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     try {
       setLoading(true);
       const data = await ClientDatabaseManager.getProductById(productId);
@@ -35,7 +27,13 @@ export default function ProductDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  // Load product details on component mount
+  useEffect(() => {
+    loadProduct();
+    loadCountryFlag();
+  }, [loadProduct, user]);
 
   const loadCountryFlag = async () => {
     // Country flag functionality removed for client-side compatibility
@@ -122,7 +120,7 @@ export default function ProductDetailPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {user?.username || 'Usuario'}
+                  {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
                 </p>
                 <div className="flex items-center space-x-1">
                   <Flag className="h-3 w-3 text-gray-400" />

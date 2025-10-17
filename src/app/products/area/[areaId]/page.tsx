@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import B4iHeader from '@/components/B4iHeader';
@@ -40,25 +40,8 @@ export default function ProductCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  // Load products and area info on component mount
-  useEffect(() => {
-    loadProducts();
-  }, [areaId, user, loadProducts]);
-
-  // Filter products based on search text
-  useEffect(() => {
-    if (searchText.trim() === '') {
-      setFilteredProducts(products);
-    } else {
-      const filtered = products.filter(product =>
-        product.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        (product.description || '').toLowerCase().includes(searchText.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    }
-  }, [searchText, products]);
-
-  const loadProducts = async () => {
+  
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const data = await ClientDatabaseManager.getProductsByArea(areaId);
@@ -81,7 +64,27 @@ export default function ProductCategoriesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [areaId]);
+  
+  // Load products and area info on component mount
+  useEffect(() => {
+    if (user) {
+      loadProducts();
+    }
+  }, [user, loadProducts]);
+
+  // Filter products based on search text
+  useEffect(() => {
+    if (searchText.trim() === '') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        (product.description || '').toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchText, products]);
 
 
   const handleProductClick = (productId: number) => {

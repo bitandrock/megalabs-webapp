@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, type Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,7 +22,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Initialize Firebase Messaging (only in browser)
-let messaging: unknown = null;
+let messaging: Messaging | null = null;
 if (typeof window !== 'undefined') {
   messaging = getMessaging(app);
 }
@@ -75,7 +75,7 @@ export const getFCMToken = async () => {
   if (!messaging) return null;
   
   try {
-    const token = await getToken(messaging, {
+    const token = await getToken(messaging as Messaging, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
     });
     return token;
@@ -89,7 +89,7 @@ export const onMessageListener = () => {
   if (!messaging) return Promise.resolve();
   
   return new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
+    onMessage(messaging as Messaging, (payload) => {
       resolve(payload);
     });
   });

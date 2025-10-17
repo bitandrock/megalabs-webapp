@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Menu, Bell, Flag, BookOpen, Clock, FileText, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,23 +20,7 @@ export default function TrainingTopicDetailPage() {
   const [readingTime, setReadingTime] = useState(0);
   const [completed, setCompleted] = useState(false);
 
-  // Load training topic details on component mount
-  useEffect(() => {
-    loadTopic();
-    if (user?.phone) {
-      loadCountryFlag();
-    }
-  }, [topicId, user, loadTopic]);
-
-  // Calculate reading time when topic loads
-  useEffect(() => {
-    if (topic?.content) {
-      const estimatedTime = Math.max(1, Math.ceil(topic.content.length / 200));
-      setReadingTime(estimatedTime);
-    }
-  }, [topic]);
-
-  const loadTopic = async () => {
+  const loadTopic = useCallback(async () => {
     try {
       setLoading(true);
       const data = await ClientDatabaseManager.getTrainingTopicById(topicId);
@@ -46,7 +30,21 @@ export default function TrainingTopicDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [topicId]);
+
+  // Load training topic details on component mount
+  useEffect(() => {
+    loadTopic();
+    loadCountryFlag();
+  }, [loadTopic, user]);
+
+  // Calculate reading time when topic loads
+  useEffect(() => {
+    if (topic?.content) {
+      const estimatedTime = Math.max(1, Math.ceil(topic.content.length / 200));
+      setReadingTime(estimatedTime);
+    }
+  }, [topic]);
 
   const loadCountryFlag = async () => {
     // Country flag functionality removed for client-side compatibility
@@ -112,7 +110,7 @@ export default function TrainingTopicDetailPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {user?.username || 'Usuario'}
+                  {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
                 </p>
                 <div className="flex items-center space-x-1">
                   <Flag className="h-3 w-3 text-gray-400" />

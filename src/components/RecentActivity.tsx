@@ -12,7 +12,7 @@ interface RecentActivityProps {
   userId?: number | string;
 }
 
-const RecentActivity: React.FC<RecentActivityProps> = ({ userId }) => {
+const RecentActivity: React.FC<RecentActivityProps> = () => {
   // Mock data - in a real app, this would come from an API
   const activities = [
     {

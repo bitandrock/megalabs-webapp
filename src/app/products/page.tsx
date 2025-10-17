@@ -19,9 +19,7 @@ export default function ProductAreasPage() {
   // Load product areas on component mount
   useEffect(() => {
     loadAreas();
-    if (user?.phone) {
-      loadCountryFlag();
-    }
+    loadCountryFlag();
   }, [user]);
 
   // Filter areas based on search text
@@ -99,7 +97,7 @@ export default function ProductAreasPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {user?.username || 'Usuario'}
+                  {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
                 </p>
                 <div className="flex items-center space-x-1">
                   <Flag className="h-3 w-3 text-gray-400" />

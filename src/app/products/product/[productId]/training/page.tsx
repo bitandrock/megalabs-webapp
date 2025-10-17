@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Search, ArrowLeft, Menu, Bell, Flag, BookOpen, Clock, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,14 +20,36 @@ export default function TrainingTopicsPage() {
   const [filteredTopics, setFilteredTopics] = useState<TrainingTopic[]>([]);
   const [countryFlag, setCountryFlag] = useState('🏳️');
 
+  const loadTrainingTopics = useCallback(async () => {
+    try {
+      const data = await ClientDatabaseManager.getTrainingTopics(productId);
+      setTrainingTopics(data);
+      setFilteredTopics(data);
+    } catch (error) {
+      console.error('Error loading training topics:', error);
+    }
+  }, [productId]);
+
+  const loadProduct = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await ClientDatabaseManager.getProductById(productId);
+      setProduct(data);
+    } catch (error) {
+      console.error('Error loading product:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [productId]);
+
   // Load training topics and product info on component mount
   useEffect(() => {
-    loadTrainingTopics();
-    loadProduct();
-    if (user?.phone) {
-      loadCountryFlag();
+    if (user) {
+      loadTrainingTopics();
+      loadProduct();
     }
-  }, [productId, user, loadTrainingTopics, loadProduct]);
+    loadCountryFlag();
+  }, [user, loadTrainingTopics, loadProduct]);
 
   // Filter topics based on search text
   useEffect(() => {
@@ -42,28 +64,6 @@ export default function TrainingTopicsPage() {
       setFilteredTopics(filtered);
     }
   }, [searchText, trainingTopics]);
-
-  const loadTrainingTopics = async () => {
-    try {
-      const data = await ClientDatabaseManager.getTrainingTopics(productId);
-      setTrainingTopics(data);
-      setFilteredTopics(data);
-    } catch (error) {
-      console.error('Error loading training topics:', error);
-    }
-  };
-
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
-      const data = await ClientDatabaseManager.getProductById(productId);
-      setProduct(data);
-    } catch (error) {
-      console.error('Error loading product:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadCountryFlag = async () => {
     // Country flag functionality removed for client-side compatibility
@@ -114,7 +114,7 @@ export default function TrainingTopicsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  {user?.username || 'Usuario'}
+                  {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
                 </p>
                 <div className="flex items-center space-x-1">
                   <Flag className="h-3 w-3 text-gray-400" />
